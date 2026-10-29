@@ -1,0 +1,6 @@
+body { font-family: system-ui, sans-serif; margin: 2rem; }
+table { border-collapse: collapse; margin: 1rem 0; }
+th, td { border: 1px solid #ccc; padding: .4rem .8rem; text-align: left; }
+tr.low { background: #fde8e8; }
+.flash { background: #e6f4ea; border: 1px solid #9bd3a8; padding: .5rem .8rem; }
+.error { color: #b00020; margin-left: .5rem; }

@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:shop
+  h2:
+    console:
+      enabled: true         
+logging:
+  level:
+    edu.itc.shop: DEBUG                  # includes TimingAspect timing lines
+    org.hibernate.SQL: DEBUG             # SQL statements (JPA)
+    org.hibernate.orm.jdbc.bind: TRACE   # bound parameters (Hibernate 6)
+    org.springframework.jdbc.core: DEBUG # SQL if you use JdbcTemplate
