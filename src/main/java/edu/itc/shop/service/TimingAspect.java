@@ -15,7 +15,7 @@ public class TimingAspect {
 
     @Around("execution(public * edu.itc.shop.service..*(..)) && !within(edu.itc.shop.service.TimingAspect)")
     public Object time(ProceedingJoinPoint pjp) throws Throwable {
-        if (!log.isDebugEnabled()) {        
+        if (!log.isDebugEnabled()) {
             return pjp.proceed();
         }
         long start = System.nanoTime();

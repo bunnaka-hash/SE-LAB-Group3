@@ -1,8 +1,9 @@
 package edu.itc.shop.web;
 
 import edu.itc.shop.config.ShopProperties;
-import edu.itc.shop.domain.Product;                 
+import edu.itc.shop.domain.Product;
 import edu.itc.shop.service.ProductService;
+import edu.itc.shop.web.dto.CreateProduct;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,12 +65,13 @@ public class ProductPageController {
                     errors.getErrorCount(),
                     errors.getFieldErrors().stream().map(FieldError::getField).toList());
             model.addAttribute("currency", props.currency());
-            return "products/form";            
+            return "products/form";
         }
 
-        Product saved = productService.create(form.getName(), form.getPrice(), form.getStock());
+        Product saved = productService.create(
+                new CreateProduct(form.getName(), form.getPrice(), form.getStock()));
 
-        redirect.addFlashAttribute("message", "Created product '" + saved.getName() + "'");
-        return "redirect:/products";          
+        redirect.addFlashAttribute("message", "Created product '" + saved.name() + "'");
+        return "redirect:/products";
     }
 }

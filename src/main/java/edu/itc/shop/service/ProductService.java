@@ -19,9 +19,13 @@ public class ProductService {
         this.repository = repository;
     }
 
+    public List<Product> findAll() {
+        return repository.findAll();
+    }
+
     public List<Product> search(String name) {
         if (name == null || name.isBlank()) {
-            return repository.findAll();
+            return findAll();
         }
 
         return repository.findByNameContaining(name.trim());
