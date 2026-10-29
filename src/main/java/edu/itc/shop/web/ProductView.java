@@ -1,6 +1,6 @@
 package edu.itc.shop.web;
 
-import edu.itc.shop.domain.Product;  
+import edu.itc.shop.domain.Product;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -17,10 +17,10 @@ public class ProductView {
     }
 
     public static ProductView from(Product p, BigDecimal taxRate) {
-        BigDecimal gross = p.getPrice()
+        BigDecimal gross = p.price()
                 .multiply(BigDecimal.ONE.add(taxRate))
                 .setScale(2, RoundingMode.HALF_UP);
-        return new ProductView(p.getId(), p.getName(), p.getPrice(), gross, p.getStock());
+        return new ProductView(p.id(), p.name(), p.price(), gross, p.stock());
     }
 
     public Long getId() { return id; }
