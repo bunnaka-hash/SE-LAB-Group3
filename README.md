@@ -15,3 +15,6 @@ with `NoUniqueBeanDefinitionException` ("more than one 'primary' bean found amon
 
 Fix applied: `@Profile("!dev")` on `EmailNotifier`, so each profile has exactly one
 `@Primary` notifier - default uses `EmailNotifier`, dev uses `ConsoleNotifier`.
+
+
+hello
