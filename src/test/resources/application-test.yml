@@ -1,0 +1,8 @@
+# 'test' profile: H2 in memory, a new database for every Spring test context,
+# filled from data-test.sql instead of data.sql.
+spring:
+  datasource:
+    url: jdbc:h2:mem:test-${random.uuid}
+  sql:
+    init:
+      data-locations: classpath:data-test.sql

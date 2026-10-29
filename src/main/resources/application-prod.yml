@@ -3,6 +3,11 @@ spring:
     url: ${DB_URL}
     username: ${DB_USER}
     password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  sql:
+    init:
+      schema-locations: classpath:db/postgresql/schema.sql
+      data-locations: classpath:db/postgresql/data.sql
   h2:
     console:
       enabled: false
