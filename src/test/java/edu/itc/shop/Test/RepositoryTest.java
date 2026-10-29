@@ -1,12 +1,17 @@
 package edu.itc.shop.Test;
+import edu.itc.shop.domain.Product;
+import edu.itc.shop.repository.ProductRepository;
+import edu.itc.shop.service.ProductService;
 
-import com.example.demo.repository.ProductRepository;
+
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.jdbc.test.autoconfigure.JdbcTest;
 import org.springframework.context.annotation.Import;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 
 @JdbcTest
 @Import(ProductRepository.class)
