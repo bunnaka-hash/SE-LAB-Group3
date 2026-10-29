@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  h2:
+    console:
+      enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: ${DB_DDL_AUTO:none}   
+management:
+  endpoint:
+    health:
+      show-details: when-authorized  
+
+logging:
+  level:
+    root: INFO
+    edu.itc.shop: INFO
