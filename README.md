@@ -10,7 +10,7 @@ Run the app: `./mvnw spring-boot:run` — H2 console at <http://localhost:8080/h
 
 ### Start-up with a correct schema
 
-```
+```text
 o.f.core.internal.command.DbMigrate : Current version of schema "PUBLIC": << Empty Schema >>
 o.f.core.internal.command.DbMigrate : Migrating schema "PUBLIC" to version "1 - init"
 o.f.core.internal.command.DbMigrate : Successfully applied 1 migration to schema "PUBLIC", now at version v1
@@ -23,7 +23,7 @@ edu.itc.shop.ShopJpaApplication : Started ShopJpaApplication in 2.0 seconds
 In `V1__init.sql` only, the `product` column `sku` was renamed to `code` (the entity was left unchanged).
 Flyway still applied the migration (the SQL itself is valid), but Hibernate refused to start:
 
-```
+```text
 Caused by: org.hibernate.tool.schema.spi.SchemaManagementException:
   Schema validation: missing column [sku] in table [product]
 ```
@@ -34,7 +34,7 @@ Reverted afterwards.
 
 In `V1__init.sql` only, `product_seq` was declared `INCREMENT BY 1` while the entity says `allocationSize = 50`:
 
-```
+```text
 Caused by: org.hibernate.MappingException:
   The increment size of the [product_seq] sequence is set to [50] in the entity mapping
   but the mapped database sequence increment size is [1]
@@ -47,7 +47,7 @@ Reverted afterwards. The `INCREMENT BY 50` in the migration must always equal `a
 
 The first start-up with the spec's `currency CHAR(3)` failed validation:
 
-```
+```text
 Schema validation: wrong column type encountered in column [currency] in table [order_line];
   found [character (Types#CHAR)], but expecting [varchar(3) (Types#VARCHAR)]
 ```
