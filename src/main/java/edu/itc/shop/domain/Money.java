@@ -19,4 +19,8 @@ public record Money(
 	public Money times(int qty) {
 		return new Money(amount.multiply(BigDecimal.valueOf(qty)), currency);
 	}
+
+	public Money plus(Money other) {
+		return new Money(amount.add(other.amount), currency);
+	}
 }
