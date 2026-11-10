@@ -19,7 +19,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>,
 
     List<Product> findTop3ByCategoryOrderByPriceAmountDesc(Category category);   // price.amount
 
-    List<Product> findByTagsName(String tagName);                                 // joins product_tag + tag
+    //List<Product> findByTagsName(String tagName);                                 // joins product_tag + tag
 
     // ---- record (DTO) projection ----
     // The record field "amount" lives at price.amount in the entity, so a purely derived
