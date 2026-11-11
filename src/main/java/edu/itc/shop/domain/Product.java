@@ -8,8 +8,13 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "product")
@@ -35,6 +40,13 @@ public class Product {
 
 	@Column(nullable = false)
 	private int stock;
+	@ManyToMany
+	@JoinTable(
+		name = "product_tag", 
+		joinColumns = @JoinColumn(name = "product_id"), 
+		inverseJoinColumns = @JoinColumn(name = "tag_id")
+	)
+	private Set<Tag> tags = new HashSet<>();
 
 	protected Product() { }
 
@@ -46,10 +58,27 @@ public class Product {
 		this.stock = stock;
 	}
 
-	public Long getId() { return id; }
-	public String getSku() { return sku; }
-	public String getName() { return name; }
-	public Money getPrice() { return price; }
-	public Category getCategory() { return category; }
-	public int getStock() { return stock; }
+	public Long getId() {
+		return id;
+	}
+	public String getSku() {
+		return sku;
+	}
+	public String getName() {
+		return name;
+	}
+	public Money getPrice() {
+		return price;
+	}
+	public Category getCategory() {
+		return category;
+	}
+	public int getStock() {
+		return stock;
+	}
+	public void tag(Tag tag) {
+		if (tags.add(tag)) {
+			tag.addProduct(this);
+		}
+	}
 }
