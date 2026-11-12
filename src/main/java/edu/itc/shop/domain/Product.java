@@ -81,4 +81,10 @@ public class Product {
 			tag.addProduct(this);
 		}
 	}
+	public void setName(String name) 
+		{ this.name = name; }
+	public void setPrice(Money price) 
+		{ this.price = price; }
+	public void setStock(int stock) 
+		{ this.stock = stock; }
 }
