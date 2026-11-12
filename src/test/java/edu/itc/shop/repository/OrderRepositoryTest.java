@@ -23,13 +23,16 @@ class OrderRepositoryTest {
     @Autowired TestEntityManager em;
     @Autowired OrderRepository orders;
     @Autowired ProductRepository products;
+    @Autowired CustomerRepository customers;
 
     Long paidOrderId;
+    Long customerId;
 
     @BeforeEach
     void seed() {
         Address a = new Address("12 St James Sq", "London", "SW1Y");
         Customer ada = em.persist(new Customer("Ada Lovelace", "ada@example.com", a, a));
+        customerId = ada.getId();
 
         Product kb   = new Product("KB-1", "Office keyboard",  Money.eur("24.90"), Category.HARDWARE, 40);
         Product book = new Product("BK-2", "Java Persistence", Money.eur("54.00"), Category.BOOKS,     2);
@@ -61,6 +64,8 @@ class OrderRepositoryTest {
         assertThat(orders.countByStatus(OrderStatus.NEW)).isEqualTo(1);
         assertThat(orders.countLinesByStatus(OrderStatus.PAID)).isEqualTo(2);   // JPQL aggregate
         assertThat(products.existsBySku("KB-1")).isTrue();
+        assertThat(customers.findByEmail("ada@example.com")).isPresent();
+        assertThat(orders.findFirstByCustomerIdOrderByPlacedAtDesc(customerId)).isPresent();
     }
 
     @Test

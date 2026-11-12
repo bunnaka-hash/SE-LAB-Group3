@@ -68,8 +68,9 @@ public class Order {
 	}
 
 	public void removeLine(OrderLine line) {
-		lines.remove(line);
-		line.setOrder(null);
+		if (lines.remove(line)) {
+			line.setOrder(null);
+		}
 	}
 
 	public Money total() {

@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import edu.itc.shop.service.CustomerNotFoundException;
+import edu.itc.shop.service.InvalidFeedRequestException;
+import edu.itc.shop.service.InvalidReportSortException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
@@ -32,6 +34,11 @@ public class ApiExceptionHandler {
     /** e.g. sort=foo,desc */
     @ExceptionHandler(PropertyReferenceException.class)
     ProblemDetail badSort(PropertyReferenceException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+
+    @ExceptionHandler({InvalidFeedRequestException.class, InvalidReportSortException.class})
+    ProblemDetail badRequest(RuntimeException e) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 }

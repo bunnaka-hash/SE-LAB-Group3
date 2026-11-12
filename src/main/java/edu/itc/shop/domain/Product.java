@@ -13,6 +13,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -40,6 +41,10 @@ public class Product {
 
 	@Column(nullable = false)
 	private int stock;
+
+	@Version
+	@Column(nullable = false)
+	private long version;
 	@ManyToMany
 	@JoinTable(
 		name = "product_tag", 
@@ -76,6 +81,9 @@ public class Product {
 	public int getStock() {
 		return stock;
 	}
+	public Set<Tag> getTags() {
+		return Set.copyOf(tags);
+	}
 	public void tag(Tag tag) {
 		if (tags.add(tag)) {
 			tag.addProduct(this);
@@ -87,4 +95,20 @@ public class Product {
 		{ this.price = price; }
 	public void setStock(int stock) 
 		{ this.stock = stock; }
+
+	@Override
+	public boolean equals(Object obj) {
+		return this == obj || (obj instanceof Product other && id != null && id.equals(other.getId()));
+	}
+
+	@Override
+	public int hashCode() {
+		return Product.class.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return "Product[id=%d, sku=%s, name=%s, price=%s, category=%s, stock=%d]"
+				.formatted(id, sku, name, price, category, stock);
+	}
 }

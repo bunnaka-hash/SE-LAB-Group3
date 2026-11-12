@@ -6,16 +6,28 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.Lock;
+import jakarta.persistence.LockModeType;
 import edu.itc.shop.domain.Category;
 import edu.itc.shop.domain.Product;
 import edu.itc.shop.web.dto.ProductView;
 
 public interface ProductRepository extends JpaRepository<Product, Long>,
-                                           JpaSpecificationExecutor<Product> {
+                                           JpaSpecificationExecutor<Product>, ProductReportRepository {
 
     // ---- derived queries ----
     boolean existsBySku(String sku);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select p from Product p where p.id = :id")
+    java.util.Optional<Product> findForUpdate(@Param("id") Long id);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("update Product p set p.stock = p.stock - :qty, p.version = p.version + 1 " +
+           "where p.id = :id and p.stock >= :qty")
+    int decrementStockIfAvailable(@Param("id") Long id, @Param("qty") int qty);
 
     List<Product> findTop3ByCategoryOrderByPriceAmountDesc(Category category);   // price.amount
 

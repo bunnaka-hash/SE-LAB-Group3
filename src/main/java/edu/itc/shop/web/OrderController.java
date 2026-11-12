@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import edu.itc.shop.domain.OrderStatus;
 import edu.itc.shop.service.OrderService;
 import edu.itc.shop.web.dto.OrderSummary;
+import edu.itc.shop.web.dto.OrderFeedResponse;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -28,5 +29,12 @@ public class OrderController {
                                    @PageableDefault(size = 20, sort = "placedAt",
                                                     direction = Sort.Direction.DESC) Pageable pageable) {
         return orderService.list(status, pageable);
+    }
+
+    @GetMapping("/feed")
+    public OrderFeedResponse feed(@RequestParam(defaultValue = "20") int size,
+                                  @RequestParam(required = false) String after,
+                                  @RequestParam(defaultValue = "keyset") String strategy) {
+        return orderService.feed(size, after, strategy);
     }
 }

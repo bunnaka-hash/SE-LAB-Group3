@@ -62,7 +62,8 @@ class OrderServiceTest {
 
         assertThat(products.findById(id).orElseThrow().getStock()).isEqualTo(99);
         assertThat(stats.getEntityUpdateCount()).isEqualTo(1);
-        assertThat(stats.getPrepareStatementCount()).isEqualTo(2); // select + update
+        assertThat(stats.getPrepareStatementCount()).isEqualTo(3);
+        // Detached merge select + versioned update + reload after the repository transaction ends.
     }
 
     // The read-only trap, kept as documentation
