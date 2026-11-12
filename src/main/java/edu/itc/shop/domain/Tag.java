@@ -7,8 +7,10 @@ import java.util.Set;
 @Entity
 
 public class Tag {
+    // SEQUENCE, matching V1__init.sql (tag_seq INCREMENT BY 50); tag.id is not an identity column
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tag_seq")
+    @SequenceGenerator(name = "tag_seq", sequenceName = "tag_seq", allocationSize = 50)
     private Long id;
 
     @Column(nullable = false, unique = true)
