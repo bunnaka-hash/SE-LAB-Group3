@@ -1,17 +1,22 @@
 ## Task 3 · Repositories, queries, projections
 
-### Boot-time error from a typo in a derived query
+### Boot-time error from a wrong property in a derived query
 
-I renamed `findByCustomerEmailAndStatusOrderByPlacedAtDesc` to `findByCustomerEmaliAndStatusOrderByPlacedAtDesc` and restarted the app:
+Spring Data parses every repository method name when the application context starts.
+While `Product` had no `tags` field yet, the derived query `ProductRepository.findByTagsName(String)`
+stopped the application during boot, before any request was handled:
 
 ```
-<paste your exact error here, it looks roughly like:
-Caused by: org.springframework.data.core.PropertyReferenceException:
-  No property 'emali' found for type 'Customer'; Did you mean 'email'
-  Traversed path: Order.customer>
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name
+  'productRepository' defined in edu.itc.shop.repository.ProductRepository: No property 'tagsName' found for type 'Product'
+Caused by: org.springframework.data.repository.query.QueryCreationException: Cannot create query for method
+  [ProductRepository.findByTagsName(java.lang.String)]; No property 'tagsName' found for type 'Product'
+Caused by: org.springframework.data.core.PropertyReferenceException: No property 'tagsName' found for type 'Product'
 ```
 
-Spring Data parses every repository method name when the context starts. A wrong property name stops the application during boot, not at the first call.
+The same happens with a plain typo such as `findByCustomerEmaliAndStatus…`:
+the error names the unknown property (`emali`) and the type where it was looked up (`Customer`).
+A wrong name is therefore caught at startup, never at the first call.
 
 ### Queries in this task
 
@@ -19,7 +24,7 @@ Spring Data parses every repository method name when the context starts. A wrong
 |---|---|---|
 | `findByCustomerEmailAndStatusOrderByPlacedAtDesc` | derived | joins `customer` |
 | `countByStatus`, `findFirstByCustomerIdOrderByPlacedAtDesc` | derived | |
-| `existsBySku`, `findTop3ByCategoryOrderByPriceAmountDesc`, `findByTagsName` | derived | `PriceAmount` = `price.amount` |
+| `existsBySku`, `findTop3ByCategoryOrderByPriceAmountDesc`, `findByTagsName` | derived | `PriceAmount` = `price.amount`; `findByTagsName` enabled once `Tag` exists (Task 2) |
 | `findWithLinesByCustomerEmail` | JPQL fetch join | orders, lines and products in 1 statement |
 | `countLinesByStatus` | JPQL aggregate | |
 | `findLowStock` | native SQL | |
@@ -29,6 +34,11 @@ Spring Data parses every repository method name when the context starts. A wrong
 
 ### Interface projection SQL (/api/orders)
 
+Only the four projected columns are selected, not the whole `Order` entity:
+
 ```
-<paste the select from the log: only id, status, placed_at, c.name>
+select o1_0.id,o1_0.status,o1_0.placed_at,c1_0.name from orders o1_0
+  join customer c1_0 on c1_0.id=o1_0.customer_id
+ where o1_0.status=? order by o1_0.placed_at desc fetch first ? rows only
+select count(o1_0.id) from orders o1_0 where o1_0.status=?
 ```
