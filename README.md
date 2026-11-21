@@ -28,3 +28,6 @@ http://localhost:8080/api/
 - Task 3: Parameters and validation
 - Task 4: Providers and filters
 - Task 5: Pagination, caching and versioning
+
+## Design note
+`ProductResource` is instantiated per request, but it has no mutable fields (only a `final` injected repository) because all state lives in the single shared repository, so nothing in the resource can be corrupted if its lifecycle later changes to a singleton or requests run concurrently.
