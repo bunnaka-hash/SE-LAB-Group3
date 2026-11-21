@@ -28,5 +28,6 @@ public class Main {
         Runtime.getRuntime().addShutdownHook(new Thread(server::shutdownNow));
         System.out.println("shop-rest listening on " + BASE);
         Thread.currentThread().join();
+        
     }
 }
