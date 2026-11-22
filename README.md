@@ -1,6 +1,6 @@
 
 # Lab 04 – RESTful Web Services (JAX-RS)
-hi
+hello guy
 ## Project Information
 - Course: Software Engineering
 - Project: shop-rest
