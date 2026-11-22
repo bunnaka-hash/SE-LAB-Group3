@@ -15,6 +15,7 @@ import edu.itc.shop.api.dto.ProductDto;
 import edu.itc.shop.api.dto.StockChange;
 import edu.itc.shop.domain.Product;
 import edu.itc.shop.domain.ProductService;
+import edu.itc.shop.api.filter.Compress;
 
 @Path("/products")
 @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
@@ -28,17 +29,19 @@ public class ProductResource {
     }
 
     @GET
+    @Compress
     public List<ProductDto> list(@BeanParam @Valid ProductFilter f) { // CHANGED
         return service.search(f.q, f.minPrice, f.maxPrice, f.inStock, f.sortField(), f.descending())
                 .stream().map(ProductDto::from).toList();
     }
 
     @GET
+    @Compress
     @Path("{id: \\d+}")
     public ProductDto get(@PathParam("id") long id) {
         return ProductDto.from(service.find(id));
     }
-
+    
     @POST
     public Response create(@Valid @NotNull ProductDto dto, @Context UriInfo uriInfo) { // CHANGED
         Product saved = service.create(dto.toProduct(0, 0));
