@@ -29,11 +29,16 @@ public class ProductDto {
     @PositiveOrZero
     public int stock;
 
-    public ProductDto() { }
+    public ProductDto() {
+    }
 
     public static ProductDto from(Product p) {
         var d = new ProductDto();
-        d.id = p.id(); d.name = p.name(); d.sku = p.sku(); d.price = p.price(); d.stock = p.stock();
+        d.id = p.id();
+        d.name = p.name();
+        d.sku = p.sku();
+        d.price = p.price();
+        d.stock = p.stock();
         return d;
     }
 

@@ -1,9 +1,12 @@
+
 package edu.itc.shop.domain;
 
 import jakarta.ws.rs.ClientErrorException;
+import jakarta.ws.rs.core.Response;
 
 public class DuplicateSkuException extends ClientErrorException {
+
     public DuplicateSkuException(String sku) {
-        super("SKU " + sku + " already exists", 409);
+        super("Duplicate SKU: " + sku, Response.Status.CONFLICT);
     }
 }

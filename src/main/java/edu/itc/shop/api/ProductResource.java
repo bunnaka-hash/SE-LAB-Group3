@@ -29,8 +29,7 @@ public class ProductResource {
     }
 
     @GET
-    @Compress
-    public List<ProductDto> list(@BeanParam @Valid ProductFilter f) { // CHANGED
+    public List<ProductDto> list(@BeanParam @Valid ProductFilter f) {
         return service.search(f.q, f.minPrice, f.maxPrice, f.inStock, f.sortField(), f.descending())
                 .stream().map(ProductDto::from).toList();
     }
@@ -60,6 +59,33 @@ public class ProductResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public ProductDto adjustStock(@PathParam("id") long id,
             @Valid @NotNull StockChange change) { // CHANGED
+        return ProductDto.from(service.adjustStock(id, change.delta()));
+    }
+
+    @DELETE
+    @Path("{id: \\d+}")
+    public ProductDto get(@PathParam("id") long id) {
+        return ProductDto.from(service.find(id));
+    }
+
+    @POST
+    public Response create(@Valid @NotNull ProductDto dto, @Context UriInfo uriInfo) {
+        Product saved = service.create(dto.toProduct(0, 0));
+        URI location = uriInfo.getAbsolutePathBuilder().path(Long.toString(saved.id())).build();
+        return Response.created(location).entity(ProductDto.from(saved)).build();
+    }
+
+    @PUT
+    @Path("{id: \\d+}")
+    public ProductDto replace(@PathParam("id") long id, @Valid @NotNull ProductDto dto) {
+        return ProductDto.from(service.replace(id, dto.toProduct(id, 0)));
+    }
+
+    @PATCH
+    @Path("{id: \\d+}/stock")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public ProductDto adjustStock(@PathParam("id") long id,
+            @Valid @NotNull StockChange change) {
         return ProductDto.from(service.adjustStock(id, change.delta()));
     }
 

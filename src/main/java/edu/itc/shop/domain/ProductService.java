@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 
@@ -21,6 +22,7 @@ public class ProductService {
 
     private final ProductRepository repo;
 
+    @Inject
     public ProductService(ProductRepository repo) {
         this.repo = repo;
     }
