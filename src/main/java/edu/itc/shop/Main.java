@@ -1,5 +1,5 @@
 package edu.itc.shop;
-
+import edu.itc.shop.domain.ProductService;
 import java.net.URI;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
@@ -18,8 +18,13 @@ public class Main {
                 .register(new AbstractBinder() {
                     @Override
                     protected void configure() {
-                        bind(new InMemoryProductRepository()).to(ProductRepository.class);
+                        bind(new InMemoryProductRepository())
+                                .to(ProductRepository.class);
+
+                        bindAsContract(ProductService.class);
                     }
+
+                
                 });
     }
 
