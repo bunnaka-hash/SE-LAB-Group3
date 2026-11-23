@@ -1,5 +1,5 @@
 package edu.itc.shop;
-
+import edu.itc.shop.domain.ProductService;
 import java.net.URI;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
@@ -23,6 +23,8 @@ public class Main {
                         bind(repo).to(ProductRepository.class);
                         bind(new ProductService(repo)).to(ProductService.class);
                     }
+
+                
                 });
     }
 

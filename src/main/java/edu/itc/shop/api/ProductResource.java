@@ -1,7 +1,9 @@
+
 package edu.itc.shop.api;
 
 import java.net.URI;
 import java.util.List;
+
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
@@ -27,43 +29,84 @@ public class ProductResource {
         this.service = service;
     }
 
+    // GET /products
     @GET
     public List<ProductDto> list(@BeanParam @Valid ProductFilter f) { // CHANGED
         return service.search(f.q, f.minPrice, f.maxPrice, f.inStock, f.sortField(), f.descending())
                 .stream().map(ProductDto::from).toList();
     }
 
+    // GET /products/{id}
     @GET
     @Path("{id: \\d+}")
     public ProductDto get(@PathParam("id") long id) {
-        return ProductDto.from(service.find(id));
+        Product product = service.findById(id)
+                .orElseThrow(() ->
+                    new NotFoundException("Product " + id + " not found")
+                );
+
+        return ProductDto.from(product);
     }
 
+    // POST /products
     @POST
-    public Response create(@Valid @NotNull ProductDto dto, @Context UriInfo uriInfo) { // CHANGED
+    public Response create(
+            ProductDto dto,
+            @Context UriInfo uriInfo) {
+
         Product saved = service.create(dto.toProduct(0, 0));
-        URI location = uriInfo.getAbsolutePathBuilder().path(Long.toString(saved.id())).build();
-        return Response.created(location).entity(ProductDto.from(saved)).build();
+
+        URI location = uriInfo.getAbsolutePathBuilder()
+                .path(Long.toString(saved.id()))
+                .build();
+
+        return Response.created(location)
+                .entity(ProductDto.from(saved))
+                .build();
     }
 
+    // PUT /products/{id}
     @PUT
     @Path("{id: \\d+}")
-    public ProductDto replace(@PathParam("id") long id, @Valid @NotNull ProductDto dto) { // CHANGED
-        return ProductDto.from(service.replace(id, dto.toProduct(id, 0)));
+    public ProductDto update(
+            @PathParam("id") long id,
+            ProductDto dto) {
+
+        Product updated = service.update(id, dto.toProduct(id, 0))
+                .orElseThrow(() ->
+                    new NotFoundException("Product " + id + " not found")
+                );
+
+        return ProductDto.from(updated);
     }
 
+    // PATCH /products/{id}/stock
     @PATCH
     @Path("{id: \\d+}/stock")
     @Consumes(MediaType.APPLICATION_JSON)
-    public ProductDto adjustStock(@PathParam("id") long id,
-            @Valid @NotNull StockChange change) { // CHANGED
-        return ProductDto.from(service.adjustStock(id, change.delta()));
+    public ProductDto changeStock(
+            @PathParam("id") long id,
+            StockChange change) {
+
+        Product updated = service.changeStock(id, change.delta())
+                .orElseThrow(() ->
+                    new NotFoundException("Product " + id + " not found")
+                );
+
+        return ProductDto.from(updated);
     }
 
+    // DELETE /products/{id}
     @DELETE
     @Path("{id: \\d+}")
     public Response delete(@PathParam("id") long id) {
-        service.delete(id);
+
+        if (!service.delete(id)) {
+            throw new NotFoundException(
+                    "Product " + id + " not found"
+            );
+        }
+
         return Response.noContent().build();
     }
 }

@@ -34,6 +34,31 @@ public class ProductDto {
     public static ProductDto from(Product p) {
         var d = new ProductDto();
         d.id = p.id(); d.name = p.name(); d.sku = p.sku(); d.price = p.price(); d.stock = p.stock();
+
+@XmlRootElement(name = "product")
+@XmlAccessorType(XmlAccessType.FIELD)
+public class ProductDto {
+
+    @XmlAttribute
+    public long id;
+
+    public String name;
+    public String sku;
+    public BigDecimal price;
+    public int stock;
+
+    public ProductDto() {
+    }
+
+    public static ProductDto from(Product p) {
+        var d = new ProductDto();
+
+        d.id = p.id();
+        d.name = p.name();
+        d.sku = p.sku();
+        d.price = p.price();
+        d.stock = p.stock();
+
         return d;
     }
 
