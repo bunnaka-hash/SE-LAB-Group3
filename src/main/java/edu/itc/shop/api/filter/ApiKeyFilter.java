@@ -20,7 +20,6 @@ public class ApiKeyFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext ctx) {
-        System.out.println(getClass().getSimpleName()); // temporary, remove after the order check
         if (SAFE.contains(ctx.getMethod())) return;
         String key = ctx.getHeaderString("X-Api-Key");
         if (key != null && keys.contains(key)) return;

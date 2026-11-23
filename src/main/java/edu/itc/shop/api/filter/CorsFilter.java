@@ -17,7 +17,6 @@ public class CorsFilter implements ContainerRequestFilter, ContainerResponseFilt
 
     @Override
     public void filter(ContainerRequestContext req) {
-        System.out.println(getClass().getSimpleName()); // temporary, remove after the order check
         if ("OPTIONS".equals(req.getMethod())) {
             req.abortWith(Response.ok().build());
         }
@@ -28,7 +27,7 @@ public class CorsFilter implements ContainerRequestFilter, ContainerResponseFilt
         var h = res.getHeaders();
         h.putSingle("Access-Control-Allow-Origin", "http://localhost:5173");
         h.putSingle("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE");
-        h.putSingle("Access-Control-Allow-Headers", "Content-Type,X-Api-Key,X-Correlation-Id,If-Match");
-        h.putSingle("Access-Control-Expose-Headers", "Location,ETag,Link,X-Total-Count,X-Correlation-Id");
+        h.putSingle("Access-Control-Allow-Headers", "Content-Type,X-Api-Key,X-Correlation-Id,If-Match,Idempotency-Key");
+        h.putSingle("Access-Control-Expose-Headers", "Location,ETag,Link,X-Total-Count,X-Correlation-Id,Idempotency-Replayed");
     }
 }

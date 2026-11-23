@@ -1,13 +1,17 @@
 package edu.itc.shop;
 
-import edu.itc.shop.domain.ProductService;
 import java.net.URI;
-import jakarta.inject.Singleton;
+
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.inject.hk2.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;
+
+import edu.itc.shop.domain.InMemoryOrderRepository;
+import edu.itc.shop.domain.OrderIdempotencyStore;
 import edu.itc.shop.domain.InMemoryProductRepository;
+import edu.itc.shop.domain.OrderRepository;
+import edu.itc.shop.domain.OrderService;
 import edu.itc.shop.domain.ProductRepository;
 import edu.itc.shop.domain.ProductService;
 import edu.itc.shop.domain.ReviewRepository;
@@ -28,6 +32,11 @@ public class Main {
                         bind(new ProductService(repo)).to(ProductService.class);
                         ReviewRepository reviewRepo = new ReviewRepository();
                         bind(reviewRepo).to(ReviewRepository.class);
+
+                        OrderRepository orderRepo = new InMemoryOrderRepository();
+                        bind(orderRepo).to(OrderRepository.class);
+                        bind(new OrderService(repo, orderRepo)).to(OrderService.class);
+                        bind(new OrderIdempotencyStore()).to(OrderIdempotencyStore.class);
                     }
                 });
     }

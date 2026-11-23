@@ -1,6 +1,12 @@
 
 package edu.itc.shop.api;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +39,7 @@ import jakarta.ws.rs.core.Request;
 @Path("/products")
 @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+@Tag(name = "Products", description = "Product catalogue")
 public class ProductResource {
 
     private final ProductService service;
@@ -101,7 +108,15 @@ public class ProductResource {
         "application/vnd.shop.v1+json",
         MediaType.APPLICATION_XML
     })
+    @Operation(summary = "Get a product")
+    @APIResponses({
+        @APIResponse(responseCode = "200", description = "Product found"),
+        @APIResponse(responseCode = "304", description = "Matching ETag"),
+        @APIResponse(responseCode = "404", description = "Unknown product"),
+        @APIResponse(responseCode = "406", description = "Not acceptable")
+    })
     public Response get(
+            @Parameter(description = "Product identifier", required = true)
             @PathParam("id") long id,
             @Context Request request) {
 
