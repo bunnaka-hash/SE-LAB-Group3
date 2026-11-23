@@ -1,6 +1,8 @@
 package edu.itc.shop;
+
 import edu.itc.shop.domain.ProductService;
 import java.net.URI;
+import jakarta.inject.Singleton;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.inject.hk2.AbstractBinder;
@@ -21,10 +23,8 @@ public class Main {
                         bind(new InMemoryProductRepository())
                                 .to(ProductRepository.class);
 
-                        bindAsContract(ProductService.class);
+                        bindAsContract(ProductService.class).in(Singleton.class);
                     }
-
-                
                 });
     }
 
