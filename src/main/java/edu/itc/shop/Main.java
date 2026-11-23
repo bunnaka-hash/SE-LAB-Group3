@@ -10,6 +10,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 import edu.itc.shop.domain.InMemoryProductRepository;
 import edu.itc.shop.domain.ProductRepository;
 import edu.itc.shop.domain.ProductService;
+import edu.itc.shop.domain.ReviewRepository;
 
 public class Main {
     public static final URI BASE = URI.create("http://localhost:8080/api/");
@@ -21,9 +22,12 @@ public class Main {
                 .register(new AbstractBinder() {
                     @Override
                     protected void configure() {
+                        
                         ProductRepository repo = new InMemoryProductRepository();
                         bind(repo).to(ProductRepository.class);
                         bind(new ProductService(repo)).to(ProductService.class);
+                        ReviewRepository reviewRepo = new ReviewRepository();
+                        bind(reviewRepo).to(ReviewRepository.class);
                     }
                 });
     }
