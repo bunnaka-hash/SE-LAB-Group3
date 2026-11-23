@@ -3,8 +3,11 @@ package edu.itc.shop.api.error;
 import java.util.Map;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
-import jakarta.ws.rs.core.*;
-import jakarta.ws.rs.ext.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.ext.Provider;
 import edu.itc.shop.api.dto.Problem;
 
 @Provider

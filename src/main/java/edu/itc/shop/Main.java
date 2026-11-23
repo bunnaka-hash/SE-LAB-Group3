@@ -9,21 +9,21 @@ import org.glassfish.jersey.inject.hk2.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;
 import edu.itc.shop.domain.InMemoryProductRepository;
 import edu.itc.shop.domain.ProductRepository;
+import edu.itc.shop.domain.ProductService;
 
 public class Main {
     public static final URI BASE = URI.create("http://localhost:8080/api/");
 
-    /** The application: scanned resources/providers + one shared repository. */
+    /** The application: scanned resources/providers + one shared repository and service. */
     public static ResourceConfig config() {
         return new ResourceConfig()
                 .packages("edu.itc.shop.api")
                 .register(new AbstractBinder() {
                     @Override
                     protected void configure() {
-                        bind(new InMemoryProductRepository())
-                                .to(ProductRepository.class);
-
-                        bindAsContract(ProductService.class).in(Singleton.class);
+                        ProductRepository repo = new InMemoryProductRepository();
+                        bind(repo).to(ProductRepository.class);
+                        bind(new ProductService(repo)).to(ProductService.class);
                     }
                 });
     }
@@ -33,5 +33,6 @@ public class Main {
         Runtime.getRuntime().addShutdownHook(new Thread(server::shutdownNow));
         System.out.println("shop-rest listening on " + BASE);
         Thread.currentThread().join();
+        
     }
 }

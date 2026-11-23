@@ -1,6 +1,7 @@
 package edu.itc.shop.api.params;
 
-import edu.itc.shop.domain.Money;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.ext.ParamConverter;
 import jakarta.ws.rs.ext.ParamConverterProvider;
@@ -25,7 +26,9 @@ public class MoneyConverterProvider implements ParamConverterProvider {
                 try {
                     return rawType.cast(Money.parse(value));
                 } catch (IllegalArgumentException e) {
-                    throw new BadRequestException(e.getMessage()); // -> 400
+                    // Jersey turns a plain failure into 404; a WebApplicationException passes
+                    // through
+                    throw new BadRequestException(e.getMessage());
                 }
             }
 

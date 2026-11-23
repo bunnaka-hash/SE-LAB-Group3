@@ -24,7 +24,7 @@ public class ProblemMapper implements ExceptionMapper<Throwable> {
             Response original = wae.getResponse();
             int status = original.getStatus();
             if (status < 400)
-                return original; // redirects / 304 pass through untouched
+                return original; // redirects / 304 pass through
             String title = original.getStatusInfo().getReasonPhrase();
             var problem = new Problem("about:blank", title, status, wae.getMessage(), path, null);
             // fromResponse keeps headers such as Allow or WWW-Authenticate
