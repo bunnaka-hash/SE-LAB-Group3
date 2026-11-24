@@ -1,90 +1,75 @@
+# Lab 05 – shop-secure (Spring Security, JWT)
 
-# Lab 04 – RESTful Web Services (JAX-RS)
-hello guy
-## Project Information
-- Course: Software Engineering
-- Project: shop-rest
-- Group ID: edu.itc
-- Artifact ID: shop-rest
-- Java: 25
-- Framework: Jakarta REST 4.0 / Jersey 4
-- Server: Grizzly
+Spring Boot 4.1.3 · Spring Security 7.1 · JDK 25 · Maven 3.9 · H2 (in memory)
 
-## Description
-A product catalogue REST API developed using Jakarta REST (JAX-RS),
-Eclipse Jersey, and an embedded Grizzly HTTP server.
+> **Version note.** The lab asks for Spring Boot 4.1.1, but start.spring.io no longer offers it,
+> so the project was generated with **4.1.3** (same 4.1 line). The Initializr id for
+> Spring Web MVC is `web` (the lab's `webmvc` id is rejected); it still adds
+> `spring-boot-starter-webmvc`.
 
-## Run the Application
+## Run
+
 ```bash
-mvn -q compile exec:java
+./mvnw -q verify            # build + tests, exit code 0
+./mvnw spring-boot:run      # http://localhost:8080
 ```
 
-## Base URL
-http://localhost:8080/api/
+All curl transcripts are in [`security-session.md`](security-session.md).
 
-## Tasks
-- Task 1: First resource and server
-- Task 2: Full CRUD, JSON and XML
-- Task 3: Parameters and validation
-- Task 4: Providers and filters
-- Task 5: Pagination, caching and versioning
+## Task 1 – default security
 
-## Design note
-`ProductResource` is instantiated per request, but it has no mutable fields (only a `final` injected repository) because all state lives in the single shared repository, so nothing in the resource can be corrupted if its lifecycle later changes to a singleton or requests run concurrently.
+With no `SecurityFilterChain` of our own, starting the app (with `--debug`) logged:
 
-## JAX-RS vs Spring MVC
+```
+Using generated security password: 257ee74d-a7af-484b-a43b-67bcd165cdbe
 
-### Lab 04: Jakarta REST
-
-```java
-@GET
-@Path("/products/{id}")
-public Response get(@PathParam("id") long id) {
-    Product product = service.find(id);
-    return Response.ok(ProductDto.from(product)).build();
-}
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
 ```
 
-```java
-@POST
-public Response create(@Valid @NotNull ProductDto dto,
-                       @Context UriInfo uriInfo) {
-    Product saved = service.create(dto.toProduct(0, 0));
-    URI location = uriInfo.getAbsolutePathBuilder()
-            .path(Long.toString(saved.id())).build();
-    return Response.created(location).entity(ProductDto.from(saved)).build();
-}
-```
+`GET /api/products` then answered **401** without credentials and **200** with
+`-u user:<generated password>` (Task 1a in `security-session.md`).
 
-### Lab 02: Spring MVC
+**Which auto-configuration does this** (from the `--debug` condition report):
 
-```java
-@GetMapping("/products/{id}")
-public ProductDto get(@PathVariable long id) {
-    return productService.find(id);
-}
-```
+- **`ServletWebSecurityAutoConfiguration.SecurityFilterChainConfiguration`** – matched because
+  there is no `SecurityFilterChain` bean. It registers `defaultSecurityFilterChain`: every request
+  must be authenticated, with form login **and** HTTP Basic enabled, CSRF on, and the security
+  headers (`X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Cache-Control: no-store`).
+- **`UserDetailsServiceAutoConfiguration`** – matched because there is no `UserDetailsService`,
+  `AuthenticationManager`, `AuthenticationProvider` or `JwtDecoder` bean. It creates an
+  `InMemoryUserDetailsManager` with one user, `user`, whose password is a random UUID printed at
+  startup (the line above).
+- **`SecurityFilterAutoConfiguration`** – registers the `springSecurityFilterChain` filter with
+  the servlet container, so the chain runs on every request.
 
-```java
-@PostMapping("/products")
-public ResponseEntity<ProductDto> create(
-        @Valid @RequestBody ProductDto dto,
-        UriComponentsBuilder uriBuilder) {
-    ProductDto saved = productService.create(dto);
-    URI location = uriBuilder.path("/products/{id}")
-            .buildAndExpand(saved.id()).toUri();
-    return ResponseEntity.created(location).body(saved);
-}
-```
+**Why we started it with `--spring.security.user.name=user`:** in this project the OAuth2
+Resource Server library is on the classpath. The condition report shows that
+`UserDetailsServiceAutoConfiguration` then *backs off*
+(`@ConditionalOnMissingClass found unwanted class '...OpaqueTokenIntrospector'`), because Boot
+assumes a token-based API wants no default user. With no user at all, every call was 401 and
+no password was printed. Setting only the user **name** satisfies the condition's
+`NameConfigured` branch, so Boot creates the user and still generates and logs the password –
+the classic default behaviour.
 
-| Area | JAX-RS (Lab 04) | Spring MVC (Lab 02) |
-|---|---|---|
-| Route annotations | `@Path`, `@GET`, `@POST` | `@RequestMapping`, `@GetMapping`, `@PostMapping` |
-| Body binding | `@Consumes` plus method parameter objects | `@RequestBody` |
-| Path parameters | `@PathParam` | `@PathVariable` |
-| Response building | `jakarta.ws.rs.core.Response` | `ResponseEntity` |
-| Errors | Exception mappers and `Problem` responses | `@ExceptionHandler` / `@RestControllerAdvice` |
-| Filters/interceptors | Container and writer filters/interceptors | Servlet filters and MVC interceptors |
-| JSON library | JSON-B / Jersey JSON binding | Jackson by default |
-| Dependency injection | Jakarta `@Inject` plus HK2 binder | Spring `@Autowired` / constructor injection |
-| Testing | `JerseyTest` plus `Main.config()` | Spring test context / `MockMvc` |
+## Task 1 – explicit `SecurityFilterChain`
+
+`config/SecurityConfig` defines one `SecurityFilterChain` bean (lambda DSL). Rules, first match wins:
+
+| Rule | Access |
+|---|---|
+| `ERROR` dispatch | permitAll (so `/error` never turns into a 401) |
+| `GET /api/products/**` | permitAll |
+| `DELETE /api/products/**` | `hasRole("ADMIN")` |
+| any other `/api/**` | authenticated |
+| anything else | `denyAll()` |
+
+HTTP Basic on, form login off, sessions `STATELESS`, CSRF disabled – safe because this chain
+accepts no cookie-based credentials, only `Authorization: Basic` (later `Bearer`) headers, which
+a browser never attaches to a cross-site request on its own.
+
+401 and 403 are written as `application/problem+json`: the entry point and the access-denied
+handler pass the exception to Spring MVC's `HandlerExceptionResolver`, so `web/ApiExceptionHandler`
+produces every error body (401, 403, 404, 400 validation) in one place. The 401 keeps the
+`WWW-Authenticate: Basic realm="Realm"` header so `curl -u` and browsers still work.
+
+Temporary users (replaced in Task 2): `admin/admin` (ADMIN), `alice/alice` (CUSTOMER).

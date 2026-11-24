@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: shop-secure
+  datasource:
+    url: jdbc:h2:mem:shop
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+  h2:
+    console:
+      enabled: false
+
+logging:
+  level:
+    # TRACE for Task 1 only: shows which security filter rejected each request
+    org.springframework.security: TRACE
