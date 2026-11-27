@@ -9,9 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
@@ -44,25 +41,20 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests(auth -> auth
                 .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/register").permitAll() // NEW (Task 2)
                 .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                 .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasRole("ADMIN")
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().denyAll())
-            .httpBasic(basic -> basic.authenticationEntryPoint(entryPoint))
-            .formLogin(form -> form.disable())
-            // CSRF disabled: this chain accepts no cookie-based credentials (Basic / Bearer only)
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .exceptionHandling(ex -> ex
-                .authenticationEntryPoint(entryPoint)
-                .accessDeniedHandler(deniedHandler));
+                .httpBasic(basic -> basic.authenticationEntryPoint(entryPoint))
+                .formLogin(form -> form.disable())
+                // CSRF disabled: this chain accepts no cookie-based credentials (Basic / Bearer
+                // only)
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(entryPoint)
+                        .accessDeniedHandler(deniedHandler));
         return http.build();
-    }
-
-    @Bean
-    UserDetailsService temporaryUsers() {           // removed in Task 2
-        return new InMemoryUserDetailsManager(
-            User.withUsername("admin").password("{noop}admin").roles("ADMIN").build(),
-            User.withUsername("alice").password("{noop}alice").roles("CUSTOMER").build());
     }
 }
