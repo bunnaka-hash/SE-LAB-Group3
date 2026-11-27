@@ -1,0 +1,15 @@
+# OWASP Top 10 (2021) release checklist
+
+| Category | Project control | Evidence |
+|---|---|---|
+| A01: Broken Access Control | `HardeningConfig.hardenedApi`; `AdminController` requires `ROLE_ADMIN` for audit and role changes. | `AuthLifecycleIT.adminAuditEndpointIsRestrictedAndRecordsRoleChangesAndDenials` |
+| A02: Cryptographic Failures | `PasswordConfig` hashes passwords; `JwtConfig` signs/verifies HS256 JWTs; `RefreshTokenService` stores SHA-256 hashes of 32-byte opaque tokens. | `AuthFlowIT.expiredTokenIs401`; `AuthLifecycleIT.rotatesRefreshTokensAndRevokesFamilyOnReuse` |
+| A03: Injection | Spring Data repositories use bound parameters; request DTOs use Bean Validation. | `HardeningTest.reviewValidationRejectsBadInput`; `AuthLifecycleIT.loginRateLimitReturnsProblemDetailsAndRetryAfter` |
+| A04: Insecure Design | Refresh rotation and family reuse detection, per-IP/per-username login limiting, and 15-minute account lockout. | `AuthLifecycleIT.rotatesRefreshTokensAndRevokesFamilyOnReuse`; `AuthLifecycleIT.fiveConsecutiveFailuresLockTheAccountAndAreAudited`; `AuthLifecycleIT.loginRateLimitReturnsProblemDetailsAndRetryAfter` |
+| A05: Security Misconfiguration | `HardeningConfig` configures stateless Bearer auth and security headers; `SecurityProps` validates the signing secret. | `HardeningTest.securityHeadersArePresent`; `HardeningTest.preflightAllowsOnlyTheFrontendOrigin` |
+| A06: Vulnerable and Outdated Components | **Gap:** the project has no automated dependency vulnerability scanning. **Planned mitigation:** add OWASP Dependency-Check or Dependabot scanning and require remediation before release. | No scan evidence yet; release blocker until scanning is enabled. |
+| A07: Identification and Authentication Failures | `AuthController`, `RefreshTokenService`, and `LockoutService` enforce short-lived access tokens, rotating refresh tokens, and generic failed-login responses. | `AuthLifecycleIT.rotatesRefreshTokensAndRevokesFamilyOnReuse`; `AuthLifecycleIT.fiveConsecutiveFailuresLockTheAccountAndAreAudited` |
+| A08: Software and Data Integrity Failures | `JwtConfig` validates signed JWTs; refresh-token rotation links replacements and detects replay. | `AuthFlowIT.expiredTokenIs401`; `AuthLifecycleIT.rotatesRefreshTokensAndRevokesFamilyOnReuse` |
+| A09: Security Logging and Monitoring Failures | `SecurityEventLogger` persists authentication and authorization events through `AuditService` in independent transactions; admins can query `/api/admin/audit`. | `AuthLifecycleIT.adminAuditEndpointIsRestrictedAndRecordsRoleChangesAndDenials`; `AuthLifecycleIT.fiveConsecutiveFailuresLockTheAccountAndAreAudited` |
+| A10: Server-Side Request Forgery (SSRF) | **Gap:** no outbound-request allow-list is implemented. **Planned mitigation:** if server-side URL fetching is introduced, restrict destinations and redirects, reject private/reserved IP ranges after DNS resolution, and add SSRF integration tests. | No outbound-fetch feature or SSRF test currently exists. |
+

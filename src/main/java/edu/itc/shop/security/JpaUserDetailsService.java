@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import java.time.Instant;
 
 @Service
 public class JpaUserDetailsService implements UserDetailsService {
@@ -27,6 +28,7 @@ public class JpaUserDetailsService implements UserDetailsService {
                 .password(account.getPasswordHash())
                 .roles(account.getRoles().stream().map(Role::name).toArray(String[]::new))
                 .disabled(!account.isEnabled())
+                .accountLocked(account.isLockedAt(Instant.now()))
                 .build();
     }
 }

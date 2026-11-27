@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import edu.itc.shop.service.ProductNotFoundException;
 import edu.itc.shop.service.UsernameTakenException;
+import edu.itc.shop.service.InvalidRefreshTokenException;
+import edu.itc.shop.service.LoginRateLimitException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
@@ -42,6 +44,20 @@ public class ApiExceptionHandler {
     @ExceptionHandler(UsernameTakenException.class)
     public ResponseEntity<ProblemDetail> usernameTaken(UsernameTakenException ex, HttpServletRequest request) {
         return problem(HttpStatus.CONFLICT, "Username already taken", request).build();
+    }
+
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    public ResponseEntity<ProblemDetail> invalidRefreshToken(InvalidRefreshTokenException ex,
+                                                               HttpServletRequest request) {
+        return problem(HttpStatus.UNAUTHORIZED, "Invalid refresh token", request).build();
+    }
+
+    @ExceptionHandler(LoginRateLimitException.class)
+    public ResponseEntity<ProblemDetail> loginRateLimited(LoginRateLimitException ex,
+                                                            HttpServletRequest request) {
+        ProblemBuilder builder = problem(HttpStatus.TOO_MANY_REQUESTS, "Too many login attempts", request);
+        builder.response.header(HttpHeaders.RETRY_AFTER, Long.toString(ex.getRetryAfterSeconds()));
+        return builder.build();
     }
 
     /**

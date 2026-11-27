@@ -13,8 +13,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 
 @Configuration
 public class JwtConfig {
@@ -35,16 +33,6 @@ public class JwtConfig {
                 .macAlgorithm(MacAlgorithm.HS256).build();
         decoder.setJwtValidator(JwtValidators.createDefaultWithIssuer("shop-api"));
         return decoder;
-    }
-
-    @Bean
-    JwtAuthenticationConverter jwtAuthenticationConverter() {
-        var roles = new JwtGrantedAuthoritiesConverter();
-        roles.setAuthoritiesClaimName("roles");
-        roles.setAuthorityPrefix("");
-        var conv = new JwtAuthenticationConverter();
-        conv.setJwtGrantedAuthoritiesConverter(roles);
-        return conv;
     }
 
     @Bean

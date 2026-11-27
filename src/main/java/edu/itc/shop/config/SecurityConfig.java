@@ -8,9 +8,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
@@ -60,22 +60,18 @@ public class SecurityConfig {
         return http.build();
     }
     @Bean
-    @org.springframework.core.annotation.Order(10) // Task 5: two catch-all chains cannot start; this one now precedes `api`
-    SecurityFilterChain chain(HttpSecurity http, JwtAuthenticationConverter conv,
-                          ProblemAuthEntryPoint entryPoint) throws Exception {
-    return http
-        .securityMatcher("/api/**") // Task 5: no longer a catch-all (the hardened /api/** chain is in HardeningConfig)
-        // CSRF off: Bearer-only API, no cookies, browser never sends credentials automatically
-        .csrf(AbstractHttpConfigurer::disable)
-        .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(a -> a
-            .requestMatchers("/api/auth/**", "/api/register").permitAll()
-            // ... keep your other existing rules here ...
-            .anyRequest().authenticated())
-        .oauth2ResourceServer(o -> o
-            .jwt(j -> j.jwtAuthenticationConverter(conv))
-            .authenticationEntryPoint(entryPoint))
-        .exceptionHandling(e -> e.authenticationEntryPoint(entryPoint))
-        .build();
+    ProblemAuthEntryPoint problemAuthEntryPoint() {
+        return new ProblemAuthEntryPoint();
     }
+
+    @Bean
+    JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtGrantedAuthoritiesConverter authorities = new JwtGrantedAuthoritiesConverter();
+        authorities.setAuthoritiesClaimName("roles");
+        authorities.setAuthorityPrefix("");
+        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+        converter.setJwtGrantedAuthoritiesConverter(authorities);
+        return converter;
+    }
+
 }

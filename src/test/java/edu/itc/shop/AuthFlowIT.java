@@ -37,14 +37,14 @@ class AuthFlowIT {
     @Test
     void loginThenAccessOrders() {
         var login = rest.postForEntity("/api/auth/login",
-                new LoginRequest("alice", "Alice-pass-123"), TokenResponse.class);
+                new LoginRequest("alice", "test-only-alice-1A"), TokenResponse.class);
 
         assertThat(login.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(login.getBody().token()).isNotBlank();
-        assertThat(login.getHeaders().containsKey("Set-Cookie")).isFalse();
+        assertThat(login.getBody().accessToken()).isNotBlank();
+        assertThat(login.getHeaders().getFirst("Set-Cookie")).isNull();
 
         var headers = new HttpHeaders();
-        headers.setBearerAuth(login.getBody().token());
+        headers.setBearerAuth(login.getBody().accessToken());
         var orders = rest.exchange("/api/orders", HttpMethod.GET,
                 new HttpEntity<>(headers), String.class);
 

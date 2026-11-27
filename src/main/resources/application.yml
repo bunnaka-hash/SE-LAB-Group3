@@ -17,6 +17,9 @@ logging:
     org.springframework.security: TRACE
 shop:
   security:
-    jwt-secret: ${JWT_SECRET}
+    jwt-secret: ${JWT_SECRET:0123456789abcdef0123456789abcdef0123456789abcdef}
     access-token-ttl: 15m
     
+  seed: 
+    admin-password: test-only-admin-1A
+    customer-password: test-only-alice-1A

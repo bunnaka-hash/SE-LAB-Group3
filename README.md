@@ -91,9 +91,8 @@ set -a; source .env; set +a
 
 - **Filter chains** (new class `HardeningConfig`): `hardenedApi` (`@Order(1)`) handles `/api/**` (Bearer JWT,
   stateless, CORS, headers, request id) and `pages` (`@Order(2)`) handles `/products/**` (public Thymeleaf page).
-  The Task 1 `api` chain is unchanged and, having no `@Order`, is evaluated last as the `denyAll` catch-all.
-  The only edit in `SecurityConfig` is on the Task 4 `chain` bean (`@Order(10)` + `securityMatcher("/api/**")`):
-  two catch-all chains make Spring Security refuse to start (`UnreachableFilterChainException`).
+  `SecurityConfig.api` is the final fallback chain and denies unmatched routes. Its JWT authority converter and
+  problem entry point are shared with the hardened chain; the redundant overlapping `/api/**` chain was removed.
   CSRF reasoning: [`docs/csrf.md`](docs/csrf.md).
 - **Task 5 settings** are in their own file `src/main/resources/config/application.properties` (log pattern with
   `rid`, lab-only HSTS flag), so `application.yml` is untouched.
@@ -104,3 +103,5 @@ set -a; source .env; set +a
   `application.yml` still sets Spring Security to TRACE (from Task 1), which is very verbose; filter with
   `grep ' SECURITY '` or lower it with `--logging.level.org.springframework.security=INFO`.
 - Evidence (preflight, headers, XSS, fail-fast, log lines): [`security-session.md`](security-session.md).
+- Release security review: [`docs/owasp-checklist.md`](docs/owasp-checklist.md). `mvnw verify` runs the unit
+  tests and the `AuthFlowIT` / `AuthLifecycleIT` integration suites.

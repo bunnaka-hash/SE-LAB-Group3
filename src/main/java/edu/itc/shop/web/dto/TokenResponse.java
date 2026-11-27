@@ -1,3 +1,7 @@
 package edu.itc.shop.web.dto;
 
-public record TokenResponse(String token, String tokenType, long expiresIn) {}
+public record TokenResponse(
+    String accessToken, 
+    String refreshToken, 
+    String tokenType, 
+    long expiresIn) {}
