@@ -15,3 +15,8 @@ logging:
   level:
     # TRACE for Task 1 only: shows which security filter rejected each request
     org.springframework.security: TRACE
+shop:
+  security:
+    jwt-secret: ${JWT_SECRET}
+    access-token-ttl: 15m
+    

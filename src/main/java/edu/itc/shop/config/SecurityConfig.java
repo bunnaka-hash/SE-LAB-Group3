@@ -8,7 +8,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
@@ -56,5 +58,22 @@ public class SecurityConfig {
                         .authenticationEntryPoint(entryPoint)
                         .accessDeniedHandler(deniedHandler));
         return http.build();
+    }
+    @Bean
+    SecurityFilterChain chain(HttpSecurity http, JwtAuthenticationConverter conv,
+                          ProblemAuthEntryPoint entryPoint) throws Exception {
+    return http
+        // CSRF off: Bearer-only API, no cookies, browser never sends credentials automatically
+        .csrf(AbstractHttpConfigurer::disable)
+        .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(a -> a
+            .requestMatchers("/api/auth/**", "/api/register").permitAll()
+            // ... keep your other existing rules here ...
+            .anyRequest().authenticated())
+        .oauth2ResourceServer(o -> o
+            .jwt(j -> j.jwtAuthenticationConverter(conv))
+            .authenticationEntryPoint(entryPoint))
+        .exceptionHandling(e -> e.authenticationEntryPoint(entryPoint))
+        .build();
     }
 }
