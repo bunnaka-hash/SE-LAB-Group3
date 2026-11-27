@@ -95,3 +95,18 @@ Date: Tue, 24 Nov 2026 15:29:16 GMT
 
 
 ```
+
+## Task 3: Roles and Method Security
+
+### Alice creates an order
+HTTP 201 Created
+
+### Bob attempts to read Alice's order
+HTTP 403 Forbidden
+
+### Admin reads Alice's order
+HTTP 200 OK
+
+### Security tests
+OrderServiceSecurityTest: 5 tests
+OrderControllerSecurityTest: 3 tests

@@ -19,6 +19,7 @@ public class ShopSecureApplication {
 
 	// NEW (Task 2): creates admin and alice if they don't exist yet (safe to run
 	// twice)
+	
 	@Bean
 	CommandLineRunner seedUsers(UserAccountRepository users,
 			AccountService accounts,
