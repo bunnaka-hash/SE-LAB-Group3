@@ -73,3 +73,34 @@ produces every error body (401, 403, 404, 400 validation) in one place. The 401 
 `WWW-Authenticate: Basic realm="Realm"` header so `curl -u` and browsers still work.
 
 Temporary users (replaced in Task 2): `admin/admin` (ADMIN), `alice/alice` (CUSTOMER).
+
+## Task 5 – hardening
+
+Configuration comes from the environment only; copy `.env.example` to `.env`, fill it in and export it:
+
+| Variable | Purpose |
+|---|---|
+| `JWT_SECRET` | HMAC key, at least 32 characters. The app refuses to start if it is missing or blank. |
+| `SHOP_SEED_ADMIN_PASSWORD` | password of the seeded `admin` user |
+| `SHOP_SEED_CUSTOMER_PASSWORD` | password of the seeded `alice` user |
+
+```bash
+set -a; source .env; set +a
+./mvnw -q verify
+```
+
+- **Filter chains** (new class `HardeningConfig`): `hardenedApi` (`@Order(1)`) handles `/api/**` (Bearer JWT,
+  stateless, CORS, headers, request id) and `pages` (`@Order(2)`) handles `/products/**` (public Thymeleaf page).
+  The Task 1 `api` chain is unchanged and, having no `@Order`, is evaluated last as the `denyAll` catch-all.
+  The only edit in `SecurityConfig` is on the Task 4 `chain` bean (`@Order(10)` + `securityMatcher("/api/**")`):
+  two catch-all chains make Spring Security refuse to start (`UnreachableFilterChainException`).
+  CSRF reasoning: [`docs/csrf.md`](docs/csrf.md).
+- **Task 5 settings** are in their own file `src/main/resources/config/application.properties` (log pattern with
+  `rid`, lab-only HSTS flag), so `application.yml` is untouched.
+- **CORS**: only `http://localhost:5173` (`CorsConfig`).
+- **HSTS note**: browsers/Spring only send HSTS over HTTPS. For the local lab `shop.security.hsts-over-http=true`
+  in `config/application.properties` makes it appear on plain `http://localhost`. **Production uses the default** (remove the property).
+- **Logging**: logger `SECURITY` (`SecurityEventLogger`) and a request id (`rid`, header `X-Request-Id`).
+  `application.yml` still sets Spring Security to TRACE (from Task 1), which is very verbose; filter with
+  `grep ' SECURITY '` or lower it with `--logging.level.org.springframework.security=INFO`.
+- Evidence (preflight, headers, XSS, fail-fast, log lines): [`security-session.md`](security-session.md).

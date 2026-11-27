@@ -60,9 +60,11 @@ public class SecurityConfig {
         return http.build();
     }
     @Bean
+    @org.springframework.core.annotation.Order(10) // Task 5: two catch-all chains cannot start; this one now precedes `api`
     SecurityFilterChain chain(HttpSecurity http, JwtAuthenticationConverter conv,
                           ProblemAuthEntryPoint entryPoint) throws Exception {
     return http
+        .securityMatcher("/api/**") // Task 5: no longer a catch-all (the hardened /api/** chain is in HardeningConfig)
         // CSRF off: Bearer-only API, no cookies, browser never sends credentials automatically
         .csrf(AbstractHttpConfigurer::disable)
         .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
