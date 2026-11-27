@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <title>Product reviews</title>
+</head>
+<body>
+  <h1 th:text="'Reviews for product ' + ${productId}">Reviews</h1>
+  <p th:if="${#lists.isEmpty(reviews)}">No reviews yet.</p>
+  <div th:each="r : ${reviews}">
+    <strong th:text="${r.author}">author</strong>
+    <span th:text="${r.stars} + '/5'">5/5</span>
+    <!-- th:text escapes < > & " '  -> a payload is shown as literal text -->
+    <p th:text="${r.text}">text</p>
+  </div>
+</body>
+</html>
